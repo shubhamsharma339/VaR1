@@ -1,0 +1,276 @@
+##Daily
+## PART 1 ##
+library(readxl)
+library(quantmod)
+library(forecast)
+
+## Data Collection ##
+NSE <- getSymbols.yahoo("^NSEI", from = "2021-4-1", to = "2023-3-31", verbose = F, auto.assign = F)
+NSE <- na.omit(NSE)
+
+GODREJPROP <- getSymbols.yahoo("GODREJPROP.NS", from = "2021-4-11", to = "2023-3-31", verbose = F, auto.assign = F)
+GODREJPROP <- na.omit(GODREJPROP)
+
+
+## Close Prices Data ##
+close <- cbind(NSE$NSEI.Close, GODREJPROP$GODREJPROP.NS.Close)
+
+## Data Manipulation ##
+T_Bill <- read_excel("C:/Users/HP/Downloads/FRAM.xlsx")
+T_Bill <- as.data.frame(T_Bill)
+T_Billxts <- xts(T_Bill[,-1], order.by = as.Date(T_Bill$Date))
+
+## Return Calculation ##
+returns
+returns <- as.xts(tail(data.frame(close),-1)/head(data.frame(close),-1) -1)
+head(returns)
+
+
+## Regression Model ##
+regression1 <- lm(GODREJPROP.NS.Close ~ NSEI.Close, data.frame(returns[]))
+summary(regression1)
+
+
+## PART 2 ##
+
+library(tseries)
+
+## Return Calculation ##
+returns_GODREJPROP <- as.xts(tail(data.frame(GODREJPROP$GODREJPROP.NS.Close),-1)/head(data.frame(GODREJPROP$GODREJPROP.NS.Close),-1)-1, frequency = 365)
+returns_GODREJPROP <- na.omit(returns_GODREJPROP)
+
+
+## Data Manipulation ##
+colnames(returns_GODREJPROP) <- "returns_GODREJPROP"
+mean(returns_GODREJPROP)
+var(returns_GODREJPROP)
+
+## Data Visualization ##
+plot(GODREJPROP$GODREJPROP.NS.Close)
+plot(returns_GODREJPROP)
+
+## model identification AR & MA ##
+adf.test(returns_GODREJPROP, alternative = "stationary")
+plot(acf(returns_GODREJPROP , lag.max = 10))
+plot(pacf(returns_GODREJPROP, lag.max = 10))
+auto.arima(returns_GODREJPROP)
+auto.arima(returns_GODREJPROP,ic = "bic")
+arima_final1 <- arima(returns_GODREJPROP, order= c(0,0,0))
+arima_final1
+predicted <- predict(arima_final1, n.ahead = 10)
+predicted
+tsdiag(arima_final1)
+
+## PART 3 ##
+
+library(quantmod)
+library(rugarch)
+library(rmgarch)
+
+## Data Collection ##
+GODREJPROP1 <- getSymbols("GODREJPROP.NS", from = "2021-4-1", to = "2023-3-31")
+GODREJPROP1 <- na.omit(GODREJPROP1)
+
+
+## Return Calculation ##
+R.GODREJPROP <- dailyReturn(GODREJPROP.NS)
+
+## Implementing Univariate GARCH ##
+ug_spec = ugarchspec()
+ug_spec
+
+## Implementing EGARCH ##
+eg_spec = ugarchspec(variance.model = list(model="eGARCH"))
+eg_spec
+
+#Estimating the models
+ugfit1 = ugarchfit(spec = ug_spec, data = R.GODREJPROP) 
+ugfit1
+
+#Forecasting
+ugforecast1 = ugarchforecast(ugfit1, n.ahead=10) 
+ugforecast1
+
+#Weekly
+## PART 1 ##
+library(readxl)
+library(quantmod)
+library(forecast)
+
+## Data Collection ##
+NSE <- getSymbols.yahoo("^NSEI", from = "2021-4-1", to = "2023-3-31", verbose = F, auto.assign = F, periodicity = "weekly")
+NSE <- na.omit(NSE)
+
+GODREJPROP <- getSymbols.yahoo("GODREJPROP.NS", from = "2021-4-11", to = "2023-3-31", verbose = F, auto.assign = F, periodicity = "weekly")
+GODREJPROP <- na.omit(GODREJPROP)
+
+## Close Prices Data ##
+close <- cbind(NSE$NSEI.Close, GODREJPROP$GODREJPROP.NS.Close)
+
+## Data Manipulation ##
+T_Bill <- read_excel("C:/Users/HP/Downloads/FRAM.xlsx")
+T_Bill <- as.data.frame(T_Bill)
+T_Billxts <- xts(T_Bill[,-1], order.by = as.Date(T_Bill$Date))
+
+## Return Calculation ##
+returns <- as.xts(tail(data.frame(close),-1)/head(data.frame(close),-1) -1)
+head(returns)
+
+
+## Regression Model ##
+regression1 <- lm(GODREJPROP.NS.Close ~ NSEI.Close, data.frame(returns[]))
+summary(regression1)
+
+
+## PART 2 ##
+
+library(tseries)
+
+## Return Calculation ##
+returns_GODREJPROP <- as.xts(tail(data.frame(GODREJPROP$GODREJPROP.NS.Close),-1)/head(data.frame(GODREJPROP$GODREJPROP.NS.Close),-1)-1, frequency = 365)
+returns_GODREJPROP <- na.omit(returns_GODREJPROP)
+
+
+## Data Manipulation ##
+colnames(returns_GODREJPROP) <- "returns_GODREJPROP"
+mean(returns_GODREJPROP)
+var(returns_GODREJPROP)
+
+## Data Visualization ##
+plot(GODREJPROP$GODREJPROP.NS.Close)
+plot(returns_GODREJPROP)
+
+## model identification AR & MA ##
+adf.test(returns_GODREJPROP, alternative = "stationary")
+plot(acf(returns_GODREJPROP , lag.max = 10))
+plot(pacf(returns_GODREJPROP, lag.max = 10))
+auto.arima(returns_GODREJPROP)
+auto.arima(returns_GODREJPROP,ic = "bic")
+arima_final1 <- arima(returns_GODREJPROP, order= c(0,0,0))
+arima_final1
+predicted <- predict(arima_final1, n.ahead = 10)
+predicted
+tsdiag(arima_final1)
+
+## PART 3 ##
+
+library(quantmod)
+library(rugarch)
+library(rmgarch)
+
+## Data Collection ##
+GODREJPROP1 <- getSymbols("GODREJPROP.NS", from = "2021-4-1", to = "2023-3-31",periodicity = "weekly")
+GODREJPROP1 <- na.omit(GODREJPROP1)
+
+
+## Return Calculation ##
+R.GODREJPROP <- dailyReturn(GODREJPROP.NS)
+
+## Implementing Univariate GARCH ##
+ug_spec = ugarchspec()
+ug_spec
+
+## Implementing EGARCH ##
+eg_spec = ugarchspec(variance.model = list(model="eGARCH"))
+eg_spec
+
+#Estimating the models
+ugfit1 = ugarchfit(spec = ug_spec, data = R.GODREJPROP) 
+ugfit1
+
+#Forecasting
+ugforecast1 = ugarchforecast(ugfit1, n.ahead=10) 
+ugforecast1
+
+
+#Monthly 
+## PART 1 ##
+library(readxl)
+library(quantmod)
+library(forecast)
+
+## Data Collection ##
+NSE <- getSymbols.yahoo("^NSEI", from = "2021-4-1", to = "2023-3-31", verbose = F, auto.assign = F, periodicity = "monthly")
+NSE <- na.omit(NSE)
+
+GODREJPROP <- getSymbols.yahoo("GODREJPROP.NS", from = "2021-4-11", to = "2023-3-31", verbose = F, auto.assign = F, periodicity = "monthly")
+GODREJPROP <- na.omit(GODREJPROP)
+
+
+## Close Prices Data ##
+close <- cbind(NSE$NSEI.Close, GODREJPROP$GODREJPROP.NS.Close)
+
+## Data Manipulation ##
+T_Bill <- read_excel("C:/Users/HP/Downloads/FRAM.xlsx")
+T_Bill <- as.data.frame(T_Bill)
+T_Billxts <- xts(T_Bill[,-1], order.by = as.Date(T_Bill$Date))
+
+## Return Calculation ##
+returns <- as.xts(tail(data.frame(close),-1)/head(data.frame(close),-1) -1)
+head(returns)
+
+
+## Regression Model ##
+regression1 <- lm(GODREJPROP.NS.Close ~ NSEI.Close, data.frame(returns[]))
+summary(regression1)
+
+
+## PART 2 ##
+
+library(tseries)
+
+## Return Calculation ##
+returns_GODREJPROP <- as.xts(tail(data.frame(GODREJPROP$GODREJPROP.NS.Close),-1)/head(data.frame(GODREJPROP$GODREJPROP.NS.Close),-1)-1, frequency = 365)
+returns_GODREJPROP <- na.omit(returns_GODREJPROP)
+
+
+## Data Manipulation ##
+colnames(returns_GODREJPROP) <- "returns_GODREJPROP"
+mean(returns_GODREJPROP)
+var(returns_GODREJPROP)
+
+## Data Visualization ##
+plot(GODREJPROP$GODREJPROP.NS.Close)
+plot(returns_GODREJPROP)
+
+## model identification AR & MA ##
+adf.test(returns_GODREJPROP, alternative = "stationary")
+plot(acf(returns_GODREJPROP , lag.max = 10))
+plot(pacf(returns_GODREJPROP, lag.max = 10))
+auto.arima(returns_GODREJPROP)
+auto.arima(returns_GODREJPROP,ic = "bic")
+arima_final1 <- arima(returns_GODREJPROP, order= c(0,0,0))
+arima_final1
+predicted <- predict(arima_final1, n.ahead = 10)
+predicted
+tsdiag(arima_final1)
+
+## PART 3 ##
+
+library(quantmod)
+library(rugarch)
+library(rmgarch)
+
+## Data Collection ##
+GODREJPROP1 <- getSymbols("GODREJPROP.NS", from = "2021-4-1", to = "2023-3-31")
+GODREJPROP1 <- na.omit(GODREJPROP1)
+
+
+## Return Calculation ##
+R.GODREJPROP <- dailyReturn(GODREJPROP.NS)
+
+## Implementing Univariate GARCH ##
+ug_spec = ugarchspec()
+ug_spec
+
+## Implementing EGARCH ##
+eg_spec = ugarchspec(variance.model = list(model="eGARCH"))
+eg_spec
+
+#Estimating the models
+ugfit1 = ugarchfit(spec = ug_spec, data = R.GODREJPROP) 
+ugfit1
+
+#Forecasting
+ugforecast1 = ugarchforecast(ugfit1, n.ahead=10) 
+ugforecast1
